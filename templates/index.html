@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>🎵 Maestro — Sua Voz, Sua Música</title>
+<title>🎵 Antídoto — Sua Voz, Sua Música</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -146,7 +146,7 @@
 <body>
 
 <div class="header">
-  <h1>🎵 Maestro</h1>
+  <h1>🎵 Antídoto</h1>
   <p>Clone sua voz. Crie sua música.</p>
 </div>
 
@@ -402,7 +402,7 @@ async function clonarVoz() {
       document.getElementById('cloneStatus').textContent = '🧬 Voz clonada com sucesso! Avance para escolher o estilo.';
       document.getElementById('cloneStatus').className = 'status-bar success';
       document.getElementById('step1').classList.add('done');
-      localStorage.setItem('maestro_voice_id', voiceId);
+      localStorage.setItem('antidoto_voice_id', voiceId);
       setTimeout(() => goToPanel(2), 1500);
     } else {
       document.getElementById('cloneStatus').style.display = 'block';
@@ -461,7 +461,7 @@ function irParaGerar() {
 
   if (!letraSelecionada) { alert('Selecione ou escreva uma letra!'); return; }
   if (!voiceId) {
-    voiceId = localStorage.getItem('maestro_voice_id');
+    voiceId = localStorage.getItem('antidoto_voice_id');
     if (!voiceId) { alert('Você precisa clonar sua voz primeiro!'); goToPanel(1); return; }
   }
 
@@ -505,14 +505,14 @@ async function gerarMusica() {
 // BIBLIOTECA
 function salvarMusica() {
   if (!ultimaMusica) return;
-  const lib = JSON.parse(localStorage.getItem('maestro_lib') || '[]');
+  const lib = JSON.parse(localStorage.getItem('antidoto_lib') || '[]');
   lib.unshift({ ...ultimaMusica, data: new Date().toLocaleDateString('pt-BR') });
-  localStorage.setItem('maestro_lib', JSON.stringify(lib));
+  localStorage.setItem('antidoto_lib', JSON.stringify(lib));
   alert('✅ Música salva na biblioteca!');
 }
 
 function carregarBiblioteca() {
-  const lib = JSON.parse(localStorage.getItem('maestro_lib') || '[]');
+  const lib = JSON.parse(localStorage.getItem('antidoto_lib') || '[]');
   const lista = document.getElementById('bibliotecaLista');
   if (lib.length === 0) {
     lista.innerHTML = '<p style="color:#6b7280">Nenhuma música salva ainda.</p>';
@@ -528,15 +528,15 @@ function carregarBiblioteca() {
 }
 
 function deletarMusica(i) {
-  const lib = JSON.parse(localStorage.getItem('maestro_lib') || '[]');
+  const lib = JSON.parse(localStorage.getItem('antidoto_lib') || '[]');
   lib.splice(i, 1);
-  localStorage.setItem('maestro_lib', JSON.stringify(lib));
+  localStorage.setItem('antidoto_lib', JSON.stringify(lib));
   carregarBiblioteca();
 }
 
 // Recuperar voice_id salvo
 window.onload = () => {
-  const saved = localStorage.getItem('maestro_voice_id');
+  const saved = localStorage.getItem('antidoto_voice_id');
   if (saved) {
     voiceId = saved;
     document.getElementById('cloneStatus').style.display = 'block';
