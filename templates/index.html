@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🎵 Maestro — Sua Voz, Sua Música</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0a0f;
+    color: #fff;
+    font-family: 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #1a0533 0%, #0d1a3a 100%);
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid #2a1a4a;
+  }
+  .header h1 { font-size: 2rem; background: linear-gradient(90deg, #a855f7, #3b82f6, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .header p { color: #888; font-size: 0.85rem; margin-top: 4px; }
+
+  /* STEPS */
+  .steps { display: flex; justify-content: center; gap: 8px; padding: 16px 20px; }
+  .step {
+    flex: 1; max-width: 80px; text-align: center;
+    padding: 8px 4px; border-radius: 10px;
+    background: #1a1a2e; border: 1px solid #2a2a4a;
+    font-size: 0.7rem; color: #666; cursor: pointer; transition: all 0.3s;
+  }
+  .step.active { background: linear-gradient(135deg, #4c1d95, #1e3a8a); border-color: #7c3aed; color: #fff; }
+  .step.done { background: #064e3b; border-color: #10b981; color: #10b981; }
+  .step .num { font-size: 1.2rem; display: block; margin-bottom: 2px; }
+
+  /* PANELS */
+  .panel { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .card {
+    background: #111827; border: 1px solid #1f2937;
+    border-radius: 16px; padding: 20px; margin-bottom: 16px;
+  }
+  .card h2 { font-size: 1.1rem; margin-bottom: 12px; color: #e2e8f0; }
+  .card p { color: #6b7280; font-size: 0.85rem; line-height: 1.5; }
+
+  /* BOTÕES */
+  .btn {
+    width: 100%; padding: 14px; border: none; border-radius: 12px;
+    font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    margin-top: 10px;
+  }
+  .btn-primary { background: linear-gradient(135deg, #7c3aed, #2563eb); color: #fff; }
+  .btn-primary:hover { opacity: 0.9; transform: scale(0.98); }
+  .btn-danger { background: linear-gradient(135deg, #dc2626, #b91c1c); color: #fff; }
+  .btn-success { background: linear-gradient(135deg, #059669, #047857); color: #fff; }
+  .btn-outline { background: transparent; border: 1px solid #374151; color: #9ca3af; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* GRAVAÇÃO */
+  .recorder-visual {
+    display: flex; align-items: center; justify-content: center;
+    height: 100px; background: #0d1117; border-radius: 12px;
+    margin: 12px 0; position: relative; overflow: hidden;
+  }
+  .mic-icon { font-size: 3rem; transition: all 0.3s; }
+  .mic-icon.recording { animation: pulse 1s infinite; color: #ef4444; }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+
+  .timer { font-size: 1.5rem; color: #7c3aed; font-weight: bold; text-align: center; margin: 8px 0; }
+
+  /* ESTILOS MUSICAIS */
+  .estilos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+  .estilo-btn {
+    padding: 14px 8px; border-radius: 12px; border: 2px solid #1f2937;
+    background: #111827; color: #9ca3af; cursor: pointer;
+    font-size: 0.85rem; text-align: center; transition: all 0.2s;
+  }
+  .estilo-btn.selected { border-color: #7c3aed; background: #1e1b4b; color: #a78bfa; }
+  .estilo-btn .emoji { font-size: 1.8rem; display: block; margin-bottom: 4px; }
+
+  /* LETRAS */
+  .letra-card {
+    background: #0d1117; border: 2px solid #1f2937;
+    border-radius: 12px; padding: 14px; margin: 8px 0; cursor: pointer; transition: all 0.2s;
+  }
+  .letra-card.selected { border-color: #7c3aed; background: #1e1b4b; }
+  .letra-card h3 { color: #e2e8f0; font-size: 0.95rem; margin-bottom: 6px; }
+  .letra-card p { color: #6b7280; font-size: 0.8rem; white-space: pre-line; }
+
+  /* PLAYER */
+  .player-card {
+    background: linear-gradient(135deg, #1a0533, #0d1a3a);
+    border: 1px solid #4c1d95; border-radius: 16px; padding: 20px; text-align: center;
+  }
+  .player-card h2 { color: #a78bfa; margin-bottom: 16px; }
+  audio { width: 100%; border-radius: 8px; margin: 10px 0; }
+
+  /* LOADING */
+  .loading {
+    display: none; text-align: center; padding: 30px;
+    color: #7c3aed; font-size: 0.9rem;
+  }
+  .loading.active { display: block; }
+  .spinner { font-size: 2.5rem; animation: spin 1s linear infinite; display: block; margin-bottom: 10px; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* BIBLIOTECA */
+  .musica-item {
+    background: #111827; border: 1px solid #1f2937;
+    border-radius: 12px; padding: 14px; margin-bottom: 10px;
+  }
+  .musica-item h3 { color: #e2e8f0; font-size: 0.95rem; margin-bottom: 8px; }
+  .musica-item audio { width: 100%; }
+
+  /* STATUS */
+  .status-bar {
+    background: #1f2937; border-radius: 8px; padding: 10px 14px;
+    margin: 10px 0; font-size: 0.85rem; color: #9ca3af;
+  }
+  .status-bar.success { background: #064e3b; color: #10b981; border: 1px solid #10b981; }
+  .status-bar.error { background: #450a0a; color: #ef4444; border: 1px solid #ef4444; }
+
+  /* NOME INPUT */
+  input[type="text"] {
+    width: 100%; padding: 12px; border-radius: 10px;
+    background: #0d1117; border: 1px solid #374151;
+    color: #fff; font-size: 1rem; margin: 8px 0;
+  }
+  input[type="text"]:focus { outline: none; border-color: #7c3aed; }
+
+  .nav-bar {
+    display: flex; justify-content: space-around;
+    background: #111827; border-top: 1px solid #1f2937;
+    position: fixed; bottom: 0; left: 0; right: 0; padding: 10px 0; z-index: 100;
+  }
+  .nav-btn { background: none; border: none; color: #6b7280; cursor: pointer; font-size: 0.7rem; text-align: center; padding: 4px 12px; }
+  .nav-btn .icon { font-size: 1.4rem; display: block; }
+  .nav-btn.active { color: #a78bfa; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎵 Maestro</h1>
+  <p>Clone sua voz. Crie sua música.</p>
+</div>
+
+<!-- STEPS -->
+<div class="steps">
+  <div class="step active" id="step1" onclick="goToPanel(1)">
+    <span class="num">🎤</span>Voz
+  </div>
+  <div class="step" id="step2" onclick="goToPanel(2)">
+    <span class="num">🎸</span>Estilo
+  </div>
+  <div class="step" id="step3" onclick="goToPanel(3)">
+    <span class="num">📝</span>Letra
+  </div>
+  <div class="step" id="step4" onclick="goToPanel(4)">
+    <span class="num">🎵</span>Gerar
+  </div>
+</div>
+
+<!-- PANEL 1: GRAVAR VOZ -->
+<div class="panel active" id="panel1">
+  <div class="card">
+    <h2>🎤 Grave sua voz</h2>
+    <p>Grave de 15 a 60 segundos falando normalmente. Quanto mais tempo, melhor o clone!</p>
+    <input type="text" id="nomeVoz" placeholder="Nome da sua voz (ex: Minha Voz)" value="Minha Voz">
+    <div class="recorder-visual">
+      <span class="mic-icon" id="micIcon">🎤</span>
+    </div>
+    <div class="timer" id="timer">00:00</div>
+    <button class="btn btn-primary" id="btnGravar" onclick="toggleGravacao()">▶ Iniciar Gravação</button>
+    <button class="btn btn-outline" id="btnUsar" style="display:none" onclick="usarGravacao()">✅ Usar esta gravação</button>
+    <div id="previewGravacao" style="display:none; margin-top:10px;">
+      <audio id="audioPreview" controls></audio>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📁 Ou importe um áudio</h2>
+    <p>Aceita MP3, M4A, WAV, OGG</p>
+    <input type="file" id="fileInput" accept="audio/*" style="display:none" onchange="importarAudio(event)">
+    <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">📂 Selecionar arquivo</button>
+    <div id="fileStatus" class="status-bar" style="display:none"></div>
+  </div>
+
+  <div id="cloneStatus" class="status-bar" style="display:none"></div>
+  <button class="btn btn-primary" id="btnClonar" style="display:none" onclick="clonarVoz()">🧬 Clonar Minha Voz</button>
+
+  <div class="loading" id="loadingClone">
+    <span class="spinner">🧬</span>
+    Clonando sua voz no ElevenLabs...<br>
+    <small>Isso pode levar até 30 segundos</small>
+  </div>
+</div>
+
+<!-- PANEL 2: ESTILO -->
+<div class="panel" id="panel2">
+  <div class="card">
+    <h2>🎸 Escolha o estilo musical</h2>
+    <p>Qual é o ritmo da sua música?</p>
+    <div class="estilos-grid">
+      <div class="estilo-btn selected" onclick="selecionarEstilo('funk', this)">
+        <span class="emoji">🎵</span>Funk
+      </div>
+      <div class="estilo-btn" onclick="selecionarEstilo('sertanejo', this)">
+        <span class="emoji">🤠</span>Sertanejo
+      </div>
+      <div class="estilo-btn" onclick="selecionarEstilo('trap', this)">
+        <span class="emoji">🔥</span>Trap
+      </div>
+      <div class="estilo-btn" onclick="selecionarEstilo('pagode', this)">
+        <span class="emoji">🥁</span>Pagode
+      </div>
+      <div class="estilo-btn" onclick="selecionarEstilo('pop', this)">
+        <span class="emoji">⭐</span>Pop
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="buscarLetras()">➡ Ver Letras Disponíveis</button>
+  </div>
+</div>
+
+<!-- PANEL 3: LETRA -->
+<div class="panel" id="panel3">
+  <div class="card">
+    <h2>📝 Escolha a letra</h2>
+    <p>Selecione uma letra pronta ou escreva a sua:</p>
+    <div id="letrasLista"></div>
+
+    <div style="margin-top:16px;">
+      <h2>✏️ Ou escreva sua própria letra:</h2>
+      <textarea id="letraCustom" rows="6" style="width:100%;background:#0d1117;border:1px solid #374151;color:#fff;border-radius:10px;padding:12px;font-size:0.9rem;margin-top:8px;" placeholder="Escreva sua letra aqui..."></textarea>
+      <input type="text" id="tituloCustom" placeholder="Título da música">
+    </div>
+    <button class="btn btn-primary" onclick="irParaGerar()">🎵 Gerar Música</button>
+  </div>
+</div>
+
+<!-- PANEL 4: GERAR -->
+<div class="panel" id="panel4">
+  <div class="loading active" id="loadingGerar">
+    <span class="spinner">🎵</span>
+    Gerando sua música com sua voz...<br>
+    <small>Aguarde, isso leva alguns segundos</small>
+  </div>
+
+  <div id="resultadoMusica" style="display:none;">
+    <div class="player-card">
+      <h2 id="tituloMusica">🎵 Sua Música</h2>
+      <audio id="audioMusica" controls></audio>
+      <button class="btn btn-success" onclick="salvarMusica()">💾 Salvar na Biblioteca</button>
+      <button class="btn btn-primary" onclick="goToPanel(1)">🔄 Criar Outra Música</button>
+    </div>
+  </div>
+
+  <div id="erroGerar" style="display:none;" class="status-bar error"></div>
+</div>
+
+<!-- NAV BAR -->
+<nav class="nav-bar">
+  <button class="nav-btn active" id="nav1" onclick="goToPanel(1)">
+    <span class="icon">🎤</span>Gravar
+  </button>
+  <button class="nav-btn" id="nav2" onclick="goToPanel(2)">
+    <span class="icon">🎸</span>Estilo
+  </button>
+  <button class="nav-btn" id="nav3" onclick="goToPanel(3)">
+    <span class="icon">📝</span>Letra
+  </button>
+  <button class="nav-btn" id="nav4" onclick="goToPanel(4)" style="display:none">
+    <span class="icon">🎵</span>Gerar
+  </button>
+  <button class="nav-btn" onclick="goToPanel('lib')">
+    <span class="icon">📚</span>Biblioteca
+  </button>
+</nav>
+
+<!-- PANEL BIBLIOTECA -->
+<div class="panel" id="panelLib">
+  <div class="card">
+    <h2>📚 Biblioteca</h2>
+    <div id="bibliotecaLista"><p style="color:#6b7280">Nenhuma música salva ainda.</p></div>
+  </div>
+</div>
+
+<script>
+let mediaRecorder = null;
+let audioChunks = [];
+let gravando = false;
+let timerInterval = null;
+let segundos = 0;
+let audioBlob = null;
+let voiceId = null;
+let estiloSelecionado = 'funk';
+let letraSelecionada = null;
+let tituloSelecionado = null;
+let ultimaMusica = null;
+
+function goToPanel(n) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+
+  if (n === 'lib') {
+    document.getElementById('panelLib').classList.add('active');
+    carregarBiblioteca();
+  } else {
+    document.getElementById('panel' + n).classList.add('active');
+    const nav = document.getElementById('nav' + n);
+    if (nav) nav.classList.add('active');
+    const step = document.getElementById('step' + n);
+    if (step) step.classList.add('active');
+  }
+}
+
+// GRAVAÇÃO
+async function toggleGravacao() {
+  if (!gravando) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const url = URL.createObjectURL(audioBlob);
+        document.getElementById('audioPreview').src = url;
+        document.getElementById('previewGravacao').style.display = 'block';
+        document.getElementById('btnUsar').style.display = 'block';
+      };
+      mediaRecorder.start();
+      gravando = true;
+      segundos = 0;
+      document.getElementById('btnGravar').textContent = '⏹ Parar Gravação';
+      document.getElementById('btnGravar').className = 'btn btn-danger';
+      document.getElementById('micIcon').className = 'mic-icon recording';
+      timerInterval = setInterval(() => {
+        segundos++;
+        const m = String(Math.floor(segundos/60)).padStart(2,'0');
+        const s = String(segundos%60).padStart(2,'0');
+        document.getElementById('timer').textContent = m + ':' + s;
+        if (segundos >= 180) toggleGravacao();
+      }, 1000);
+    } catch(e) {
+      alert('Erro ao acessar microfone: ' + e.message);
+    }
+  } else {
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(t => t.stop());
+    clearInterval(timerInterval);
+    gravando = false;
+    document.getElementById('btnGravar').textContent = '▶ Gravar Novamente';
+    document.getElementById('btnGravar').className = 'btn btn-outline';
+    document.getElementById('micIcon').className = 'mic-icon';
+  }
+}
+
+function usarGravacao() {
+  document.getElementById('btnClonar').style.display = 'block';
+  document.getElementById('cloneStatus').style.display = 'block';
+  document.getElementById('cloneStatus').textContent = '✅ Áudio pronto! Clique em "Clonar Minha Voz" para continuar.';
+  document.getElementById('cloneStatus').className = 'status-bar success';
+}
+
+function importarAudio(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  audioBlob = file;
+  const status = document.getElementById('fileStatus');
+  status.style.display = 'block';
+  status.textContent = '✅ Arquivo: ' + file.name;
+  status.className = 'status-bar success';
+  document.getElementById('btnClonar').style.display = 'block';
+}
+
+async function clonarVoz() {
+  if (!audioBlob) { alert('Grave ou importe um áudio primeiro!'); return; }
+
+  document.getElementById('loadingClone').classList.add('active');
+  document.getElementById('btnClonar').disabled = true;
+
+  const formData = new FormData();
+  formData.append('audio', audioBlob, 'voice.webm');
+  formData.append('nome', document.getElementById('nomeVoz').value || 'Minha Voz');
+
+  try {
+    const resp = await fetch('/api/clone_voice', { method: 'POST', body: formData });
+    const data = await resp.json();
+
+    document.getElementById('loadingClone').classList.remove('active');
+
+    if (data.success) {
+      voiceId = data.voice_id;
+      document.getElementById('cloneStatus').style.display = 'block';
+      document.getElementById('cloneStatus').textContent = '🧬 Voz clonada com sucesso! Avance para escolher o estilo.';
+      document.getElementById('cloneStatus').className = 'status-bar success';
+      document.getElementById('step1').classList.add('done');
+      localStorage.setItem('maestro_voice_id', voiceId);
+      setTimeout(() => goToPanel(2), 1500);
+    } else {
+      document.getElementById('cloneStatus').style.display = 'block';
+      document.getElementById('cloneStatus').textContent = '❌ Erro: ' + data.error;
+      document.getElementById('cloneStatus').className = 'status-bar error';
+    }
+  } catch(e) {
+    document.getElementById('loadingClone').classList.remove('active');
+    document.getElementById('cloneStatus').style.display = 'block';
+    document.getElementById('cloneStatus').textContent = '❌ Erro de conexão: ' + e.message;
+    document.getElementById('cloneStatus').className = 'status-bar error';
+  }
+  document.getElementById('btnClonar').disabled = false;
+}
+
+// ESTILO
+function selecionarEstilo(estilo, el) {
+  document.querySelectorAll('.estilo-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  estiloSelecionado = estilo;
+}
+
+async function buscarLetras() {
+  const resp = await fetch('/api/letras', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ estilo: estiloSelecionado })
+  });
+  const data = await resp.json();
+  const lista = document.getElementById('letrasLista');
+  lista.innerHTML = '';
+  data.letras.forEach((l, i) => {
+    const div = document.createElement('div');
+    div.className = 'letra-card';
+    div.innerHTML = `<h3>🎵 ${l.titulo}</h3><p>${l.letra}</p>`;
+    div.onclick = () => {
+      document.querySelectorAll('.letra-card').forEach(c => c.classList.remove('selected'));
+      div.classList.add('selected');
+      letraSelecionada = l.letra;
+      tituloSelecionado = l.titulo;
+    };
+    lista.appendChild(div);
+  });
+  document.getElementById('step2').classList.add('done');
+  goToPanel(3);
+}
+
+function irParaGerar() {
+  const letraCustom = document.getElementById('letraCustom').value.trim();
+  const tituloCustom = document.getElementById('tituloCustom').value.trim();
+
+  if (letraCustom) {
+    letraSelecionada = letraCustom;
+    tituloSelecionado = tituloCustom || 'Minha Música';
+  }
+
+  if (!letraSelecionada) { alert('Selecione ou escreva uma letra!'); return; }
+  if (!voiceId) {
+    voiceId = localStorage.getItem('maestro_voice_id');
+    if (!voiceId) { alert('Você precisa clonar sua voz primeiro!'); goToPanel(1); return; }
+  }
+
+  document.getElementById('step3').classList.add('done');
+  document.getElementById('nav4').style.display = 'block';
+  goToPanel(4);
+  gerarMusica();
+}
+
+async function gerarMusica() {
+  document.getElementById('loadingGerar').classList.add('active');
+  document.getElementById('resultadoMusica').style.display = 'none';
+  document.getElementById('erroGerar').style.display = 'none';
+
+  try {
+    const resp = await fetch('/api/gerar_musica', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ voice_id: voiceId, letra: letraSelecionada, titulo: tituloSelecionado })
+    });
+    const data = await resp.json();
+    document.getElementById('loadingGerar').classList.remove('active');
+
+    if (data.success) {
+      const audioSrc = 'data:audio/mpeg;base64,' + data.audio;
+      document.getElementById('audioMusica').src = audioSrc;
+      document.getElementById('tituloMusica').textContent = '🎵 ' + data.titulo;
+      document.getElementById('resultadoMusica').style.display = 'block';
+      ultimaMusica = { titulo: data.titulo, audio: data.audio, estilo: estiloSelecionado };
+    } else {
+      document.getElementById('erroGerar').style.display = 'block';
+      document.getElementById('erroGerar').textContent = '❌ ' + data.error;
+    }
+  } catch(e) {
+    document.getElementById('loadingGerar').classList.remove('active');
+    document.getElementById('erroGerar').style.display = 'block';
+    document.getElementById('erroGerar').textContent = '❌ Erro: ' + e.message;
+  }
+}
+
+// BIBLIOTECA
+function salvarMusica() {
+  if (!ultimaMusica) return;
+  const lib = JSON.parse(localStorage.getItem('maestro_lib') || '[]');
+  lib.unshift({ ...ultimaMusica, data: new Date().toLocaleDateString('pt-BR') });
+  localStorage.setItem('maestro_lib', JSON.stringify(lib));
+  alert('✅ Música salva na biblioteca!');
+}
+
+function carregarBiblioteca() {
+  const lib = JSON.parse(localStorage.getItem('maestro_lib') || '[]');
+  const lista = document.getElementById('bibliotecaLista');
+  if (lib.length === 0) {
+    lista.innerHTML = '<p style="color:#6b7280">Nenhuma música salva ainda.</p>';
+    return;
+  }
+  lista.innerHTML = lib.map((m, i) => `
+    <div class="musica-item">
+      <h3>🎵 ${m.titulo} <small style="color:#6b7280">${m.data}</small></h3>
+      <audio controls src="data:audio/mpeg;base64,${m.audio}"></audio>
+      <button class="btn btn-danger" onclick="deletarMusica(${i})" style="margin-top:8px;padding:8px">🗑 Deletar</button>
+    </div>
+  `).join('');
+}
+
+function deletarMusica(i) {
+  const lib = JSON.parse(localStorage.getItem('maestro_lib') || '[]');
+  lib.splice(i, 1);
+  localStorage.setItem('maestro_lib', JSON.stringify(lib));
+  carregarBiblioteca();
+}
+
+// Recuperar voice_id salvo
+window.onload = () => {
+  const saved = localStorage.getItem('maestro_voice_id');
+  if (saved) {
+    voiceId = saved;
+    document.getElementById('cloneStatus').style.display = 'block';
+    document.getElementById('cloneStatus').textContent = '✅ Voz clonada anteriormente detectada! Pode avançar.';
+    document.getElementById('cloneStatus').className = 'status-bar success';
+    document.getElementById('step1').classList.add('done');
+  }
+};
+</script>
+</body>
+</html>
