@@ -78,7 +78,7 @@ def clone_voice():
             resp = requests.post(
                 'https://api.elevenlabs.io/v1/voices/add',
                 headers={'xi-api-key': ELEVENLABS_API_KEY},
-                data={'name': nome, 'description': 'Voz clonada pelo Maestro'},
+                data={'name': nome, 'description': 'Voz clonada pelo Antídoto'},
                 files={'files': (f'{nome}.mp3', f, 'audio/mpeg')},
                 timeout=60
             )
