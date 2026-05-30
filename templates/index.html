@@ -390,8 +390,12 @@ async function clonarVoz() {
   formData.append('audio', audioBlob, 'voice.webm');
   formData.append('nome', document.getElementById('nomeVoz').value || 'Minha Voz');
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 segundos
+
   try {
-    const resp = await fetch('/api/clone_voice', { method: 'POST', body: formData });
+    const resp = await fetch('/api/clone_voice', { method: 'POST', body: formData, signal: controller.signal });
+    clearTimeout(timeoutId);
     const data = await resp.json();
 
     document.getElementById('loadingClone').classList.remove('active');
@@ -410,9 +414,11 @@ async function clonarVoz() {
       document.getElementById('cloneStatus').className = 'status-bar error';
     }
   } catch(e) {
+    clearTimeout(timeoutId);
     document.getElementById('loadingClone').classList.remove('active');
     document.getElementById('cloneStatus').style.display = 'block';
-    document.getElementById('cloneStatus').textContent = '❌ Erro de conexão: ' + e.message;
+    const msg = e.name === 'AbortError' ? '⏱ Timeout! O servidor demorou demais. Tente um áudio mais curto (30s).' : '❌ Erro: ' + e.message;
+    document.getElementById('cloneStatus').textContent = msg;
     document.getElementById('cloneStatus').className = 'status-bar error';
   }
   document.getElementById('btnClonar').disabled = false;
