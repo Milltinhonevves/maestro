@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>🎵 Antídoto — Sua Voz, Sua Música</title>
+<title>🎵 Antídoto — Sua Música com IA</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -11,10 +11,8 @@
     color: #fff;
     font-family: 'Segoe UI', sans-serif;
     min-height: 100vh;
-    padding-bottom: 40px;
+    padding-bottom: 80px;
   }
-
-  /* HEADER */
   .header {
     background: linear-gradient(135deg, #1a0533 0%, #0d1a3a 100%);
     padding: 20px;
@@ -24,7 +22,6 @@
   .header h1 { font-size: 2rem; background: linear-gradient(90deg, #a855f7, #3b82f6, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .header p { color: #888; font-size: 0.85rem; margin-top: 4px; }
 
-  /* STEPS */
   .steps { display: flex; justify-content: center; gap: 8px; padding: 16px 20px; }
   .step {
     flex: 1; max-width: 80px; text-align: center;
@@ -36,7 +33,6 @@
   .step.done { background: #064e3b; border-color: #10b981; color: #10b981; }
   .step .num { font-size: 1.2rem; display: block; margin-bottom: 2px; }
 
-  /* PANELS */
   .panel { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
   .panel.active { display: block; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -46,34 +42,32 @@
     border-radius: 16px; padding: 20px; margin-bottom: 16px;
   }
   .card h2 { font-size: 1.1rem; margin-bottom: 12px; color: #e2e8f0; }
-  .card p { color: #6b7280; font-size: 0.85rem; line-height: 1.5; }
+  .card p { color: #6b7280; font-size: 0.85rem; line-height: 1.5; margin-bottom: 8px; }
 
-  /* BOTÕES */
   .btn {
     width: 100%; padding: 14px; border: none; border-radius: 12px;
     font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
     margin-top: 10px;
   }
   .btn-primary { background: linear-gradient(135deg, #7c3aed, #2563eb); color: #fff; }
-  .btn-primary:hover { opacity: 0.9; transform: scale(0.98); }
-  .btn-danger { background: linear-gradient(135deg, #dc2626, #b91c1c); color: #fff; }
+  .btn-primary:active { opacity: 0.85; transform: scale(0.98); }
   .btn-success { background: linear-gradient(135deg, #059669, #047857); color: #fff; }
   .btn-outline { background: transparent; border: 1px solid #374151; color: #9ca3af; }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* GRAVAÇÃO */
-  .recorder-visual {
-    display: flex; align-items: center; justify-content: center;
-    height: 100px; background: #0d1117; border-radius: 12px;
-    margin: 12px 0; position: relative; overflow: hidden;
+  /* VOZES */
+  .voz-card {
+    background: #0d1117; border: 2px solid #1f2937;
+    border-radius: 12px; padding: 14px; margin: 8px 0; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; gap: 12px;
   }
-  .mic-icon { font-size: 3rem; transition: all 0.3s; }
-  .mic-icon.recording { animation: pulse 1s infinite; color: #ef4444; }
-  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+  .voz-card.selected { border-color: #7c3aed; background: #1e1b4b; }
+  .voz-card .avatar { font-size: 2rem; width: 44px; text-align: center; }
+  .voz-card .info { flex: 1; }
+  .voz-card .info h3 { color: #e2e8f0; font-size: 0.95rem; }
+  .voz-card .info span { color: #6b7280; font-size: 0.75rem; }
 
-  .timer { font-size: 1.5rem; color: #7c3aed; font-weight: bold; text-align: center; margin: 8px 0; }
-
-  /* ESTILOS MUSICAIS */
+  /* ESTILOS */
   .estilos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
   .estilo-btn {
     padding: 14px 8px; border-radius: 12px; border: 2px solid #1f2937;
@@ -97,25 +91,14 @@
     background: linear-gradient(135deg, #1a0533, #0d1a3a);
     border: 1px solid #4c1d95; border-radius: 16px; padding: 20px; text-align: center;
   }
-  .player-card h2 { color: #a78bfa; margin-bottom: 16px; }
+  .player-card h2 { color: #a78bfa; margin-bottom: 16px; font-size: 1.2rem; }
   audio { width: 100%; border-radius: 8px; margin: 10px 0; }
 
   /* LOADING */
-  .loading {
-    display: none; text-align: center; padding: 30px;
-    color: #7c3aed; font-size: 0.9rem;
-  }
+  .loading { display: none; text-align: center; padding: 30px; color: #7c3aed; font-size: 0.9rem; }
   .loading.active { display: block; }
   .spinner { font-size: 2.5rem; animation: spin 1s linear infinite; display: block; margin-bottom: 10px; }
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-  /* BIBLIOTECA */
-  .musica-item {
-    background: #111827; border: 1px solid #1f2937;
-    border-radius: 12px; padding: 14px; margin-bottom: 10px;
-  }
-  .musica-item h3 { color: #e2e8f0; font-size: 0.95rem; margin-bottom: 8px; }
-  .musica-item audio { width: 100%; }
 
   /* STATUS */
   .status-bar {
@@ -125,13 +108,21 @@
   .status-bar.success { background: #064e3b; color: #10b981; border: 1px solid #10b981; }
   .status-bar.error { background: #450a0a; color: #ef4444; border: 1px solid #ef4444; }
 
-  /* NOME INPUT */
-  input[type="text"] {
+  input[type="text"], textarea {
     width: 100%; padding: 12px; border-radius: 10px;
     background: #0d1117; border: 1px solid #374151;
     color: #fff; font-size: 1rem; margin: 8px 0;
   }
-  input[type="text"]:focus { outline: none; border-color: #7c3aed; }
+  input[type="text"]:focus, textarea:focus { outline: none; border-color: #7c3aed; }
+
+  /* BIBLIOTECA */
+  .musica-item {
+    background: #111827; border: 1px solid #1f2937;
+    border-radius: 12px; padding: 14px; margin-bottom: 10px;
+  }
+  .musica-item h3 { color: #e2e8f0; font-size: 0.95rem; margin-bottom: 8px; }
+  .musica-item audio { width: 100%; }
+  .musica-item .del-btn { background: #450a0a; color: #ef4444; border: none; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; margin-top: 8px; }
 
   .nav-bar {
     display: flex; justify-content: space-around;
@@ -141,16 +132,17 @@
   .nav-btn { background: none; border: none; color: #6b7280; cursor: pointer; font-size: 0.7rem; text-align: center; padding: 4px 12px; }
   .nav-btn .icon { font-size: 1.4rem; display: block; }
   .nav-btn.active { color: #a78bfa; }
+
+  .empty { text-align: center; color: #4b5563; padding: 30px; font-size: 0.9rem; }
 </style>
 </head>
 <body>
 
 <div class="header">
   <h1>🎵 Antídoto</h1>
-  <p>Clone sua voz. Crie sua música.</p>
+  <p>Escolha uma voz. Crie sua música com IA.</p>
 </div>
 
-<!-- STEPS -->
 <div class="steps">
   <div class="step active" id="step1" onclick="goToPanel(1)">
     <span class="num">🎤</span>Voz
@@ -166,38 +158,19 @@
   </div>
 </div>
 
-<!-- PANEL 1: GRAVAR VOZ -->
+<!-- PANEL 1: ESCOLHER VOZ -->
 <div class="panel active" id="panel1">
   <div class="card">
-    <h2>🎤 Grave sua voz</h2>
-    <p>Grave de 15 a 60 segundos falando normalmente. Quanto mais tempo, melhor o clone!</p>
-    <input type="text" id="nomeVoz" placeholder="Nome da sua voz (ex: Minha Voz)" value="Minha Voz">
-    <div class="recorder-visual">
-      <span class="mic-icon" id="micIcon">🎤</span>
+    <h2>🎤 Escolha uma voz</h2>
+    <p>Selecione a voz que vai cantar sua música:</p>
+    <div id="vozesLista">
+      <div class="loading active" style="display:block">
+        <span class="spinner">🎵</span>
+        Carregando vozes disponíveis...
+      </div>
     </div>
-    <div class="timer" id="timer">00:00</div>
-    <button class="btn btn-primary" id="btnGravar" onclick="toggleGravacao()">▶ Iniciar Gravação</button>
-    <button class="btn btn-outline" id="btnUsar" style="display:none" onclick="usarGravacao()">✅ Usar esta gravação</button>
-    <div id="previewGravacao" style="display:none; margin-top:10px;">
-      <audio id="audioPreview" controls></audio>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>📁 Ou importe um áudio</h2>
-    <p>Aceita MP3, M4A, WAV, OGG</p>
-    <input type="file" id="fileInput" accept="audio/*" style="display:none" onchange="importarAudio(event)">
-    <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">📂 Selecionar arquivo</button>
-    <div id="fileStatus" class="status-bar" style="display:none"></div>
-  </div>
-
-  <div id="cloneStatus" class="status-bar" style="display:none"></div>
-  <button class="btn btn-primary" id="btnClonar" style="display:none" onclick="clonarVoz()">🧬 Clonar Minha Voz</button>
-
-  <div class="loading" id="loadingClone">
-    <span class="spinner">🧬</span>
-    Clonando sua voz no ElevenLabs...<br>
-    <small>Isso pode levar até 30 segundos</small>
+    <div id="vozStatus" class="status-bar" style="display:none"></div>
+    <button class="btn btn-primary" id="btnEscolherVoz" style="display:none" onclick="confirmarVoz()">➡ Avançar para o Estilo</button>
   </div>
 </div>
 
@@ -223,50 +196,59 @@
         <span class="emoji">⭐</span>Pop
       </div>
     </div>
-    <button class="btn btn-primary" onclick="buscarLetras()">➡ Ver Letras Disponíveis</button>
+    <button class="btn btn-primary" onclick="buscarLetras()">➡ Ver Letras</button>
   </div>
 </div>
 
 <!-- PANEL 3: LETRA -->
 <div class="panel" id="panel3">
   <div class="card">
-    <h2>📝 Escolha a letra</h2>
+    <h2>📝 Escolha ou escreva a letra</h2>
     <p>Selecione uma letra pronta ou escreva a sua:</p>
     <div id="letrasLista"></div>
 
     <div style="margin-top:16px;">
-      <h2>✏️ Ou escreva sua própria letra:</h2>
-      <textarea id="letraCustom" rows="6" style="width:100%;background:#0d1117;border:1px solid #374151;color:#fff;border-radius:10px;padding:12px;font-size:0.9rem;margin-top:8px;" placeholder="Escreva sua letra aqui..."></textarea>
+      <h2 style="margin-bottom:8px;">✏️ Ou escreva sua própria:</h2>
+      <textarea id="letraCustom" rows="5" placeholder="Escreva sua letra aqui..."></textarea>
       <input type="text" id="tituloCustom" placeholder="Título da música">
     </div>
     <button class="btn btn-primary" onclick="irParaGerar()">🎵 Gerar Música</button>
   </div>
 </div>
 
-<!-- PANEL 4: GERAR -->
+<!-- PANEL 4: GERAR / RESULTADO -->
 <div class="panel" id="panel4">
-  <div class="loading active" id="loadingGerar">
+  <div class="loading" id="loadingGerar">
     <span class="spinner">🎵</span>
-    Gerando sua música com sua voz...<br>
-    <small>Aguarde, isso leva alguns segundos</small>
+    Gerando sua música...<br>
+    <small>Pode levar até 30 segundos</small>
   </div>
 
-  <div id="resultadoMusica" style="display:none;">
+  <div id="resultadoMusica" style="display:none">
     <div class="player-card">
       <h2 id="tituloMusica">🎵 Sua Música</h2>
-      <audio id="audioMusica" controls></audio>
+      <audio id="audioPlayer" controls></audio>
       <button class="btn btn-success" onclick="salvarMusica()">💾 Salvar na Biblioteca</button>
-      <button class="btn btn-primary" onclick="goToPanel(1)">🔄 Criar Outra Música</button>
+      <button class="btn btn-outline" onclick="goToPanel(1)" style="margin-top:8px;">🔄 Criar outra música</button>
     </div>
   </div>
 
-  <div id="erroGerar" style="display:none;" class="status-bar error"></div>
+  <div id="erroGerar" class="status-bar error" style="display:none"></div>
+</div>
+
+<!-- PANEL 5: BIBLIOTECA -->
+<div class="panel" id="panel5">
+  <div class="card">
+    <h2>📚 Biblioteca</h2>
+    <p>Suas músicas salvas:</p>
+    <div id="bibliotecaLista"></div>
+  </div>
 </div>
 
 <!-- NAV BAR -->
-<nav class="nav-bar">
+<div class="nav-bar">
   <button class="nav-btn active" id="nav1" onclick="goToPanel(1)">
-    <span class="icon">🎤</span>Gravar
+    <span class="icon">🎤</span>Voz
   </button>
   <button class="nav-btn" id="nav2" onclick="goToPanel(2)">
     <span class="icon">🎸</span>Estilo
@@ -274,283 +256,236 @@
   <button class="nav-btn" id="nav3" onclick="goToPanel(3)">
     <span class="icon">📝</span>Letra
   </button>
-  <button class="nav-btn" id="nav4" onclick="goToPanel(4)" style="display:none">
-    <span class="icon">🎵</span>Gerar
-  </button>
-  <button class="nav-btn" onclick="goToPanel('lib')">
+  <button class="nav-btn" id="nav5" onclick="goToPanel(5)">
     <span class="icon">📚</span>Biblioteca
   </button>
-</nav>
-
-<!-- PANEL BIBLIOTECA -->
-<div class="panel" id="panelLib">
-  <div class="card">
-    <h2>📚 Biblioteca</h2>
-    <div id="bibliotecaLista"><p style="color:#6b7280">Nenhuma música salva ainda.</p></div>
-  </div>
 </div>
 
 <script>
-let mediaRecorder = null;
-let audioChunks = [];
-let gravando = false;
-let timerInterval = null;
-let segundos = 0;
-let audioBlob = null;
 let voiceId = null;
-let estiloSelecionado = 'funk';
+let voiceName = '';
+let estiloAtual = 'funk';
 let letraSelecionada = null;
-let tituloSelecionado = null;
-let ultimaMusica = null;
+let tituloSelecionado = '';
+let ultimoAudioB64 = null;
+let ultimoTitulo = '';
 
+// =====================
+// NAVEGAÇÃO
+// =====================
 function goToPanel(n) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-  if (n === 'lib') {
-    document.getElementById('panelLib').classList.add('active');
-    carregarBiblioteca();
-  } else {
-    document.getElementById('panel' + n).classList.add('active');
-    const nav = document.getElementById('nav' + n);
-    if (nav) nav.classList.add('active');
-    const step = document.getElementById('step' + n);
-    if (step) step.classList.add('active');
-  }
+  document.getElementById('panel' + n).classList.add('active');
+  if (document.getElementById('step' + n)) document.getElementById('step' + n).classList.add('active');
+  if (document.getElementById('nav' + n)) document.getElementById('nav' + n).classList.add('active');
+
+  if (n === 5) carregarBiblioteca();
 }
 
-// GRAVAÇÃO
-async function toggleGravacao() {
-  if (!gravando) {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioChunks = [];
-      mediaRecorder = new MediaRecorder(stream);
-      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-      mediaRecorder.onstop = () => {
-        audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-        const url = URL.createObjectURL(audioBlob);
-        document.getElementById('audioPreview').src = url;
-        document.getElementById('previewGravacao').style.display = 'block';
-        document.getElementById('btnUsar').style.display = 'block';
-      };
-      mediaRecorder.start();
-      gravando = true;
-      segundos = 0;
-      document.getElementById('btnGravar').textContent = '⏹ Parar Gravação';
-      document.getElementById('btnGravar').className = 'btn btn-danger';
-      document.getElementById('micIcon').className = 'mic-icon recording';
-      timerInterval = setInterval(() => {
-        segundos++;
-        const m = String(Math.floor(segundos/60)).padStart(2,'0');
-        const s = String(segundos%60).padStart(2,'0');
-        document.getElementById('timer').textContent = m + ':' + s;
-        if (segundos >= 180) toggleGravacao();
-      }, 1000);
-    } catch(e) {
-      alert('Erro ao acessar microfone: ' + e.message);
-    }
-  } else {
-    mediaRecorder.stop();
-    mediaRecorder.stream.getTracks().forEach(t => t.stop());
-    clearInterval(timerInterval);
-    gravando = false;
-    document.getElementById('btnGravar').textContent = '▶ Gravar Novamente';
-    document.getElementById('btnGravar').className = 'btn btn-outline';
-    document.getElementById('micIcon').className = 'mic-icon';
-  }
-}
+// =====================
+// VOZES
+// =====================
+const EMOJIS_VOZ = ['🧑', '👩', '👨', '🎤', '🧕', '👴', '👵', '🧑‍🎤', '👩‍🎤', '👨‍🎤'];
 
-function usarGravacao() {
-  document.getElementById('btnClonar').style.display = 'block';
-  document.getElementById('cloneStatus').style.display = 'block';
-  document.getElementById('cloneStatus').textContent = '✅ Áudio pronto! Clique em "Clonar Minha Voz" para continuar.';
-  document.getElementById('cloneStatus').className = 'status-bar success';
-}
-
-function importarAudio(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  audioBlob = file;
-  const status = document.getElementById('fileStatus');
-  status.style.display = 'block';
-  status.textContent = '✅ Arquivo: ' + file.name;
-  status.className = 'status-bar success';
-  document.getElementById('btnClonar').style.display = 'block';
-}
-
-async function clonarVoz() {
-  if (!audioBlob) { alert('Grave ou importe um áudio primeiro!'); return; }
-
-  document.getElementById('loadingClone').classList.add('active');
-  document.getElementById('btnClonar').disabled = true;
-
-  const formData = new FormData();
-  formData.append('audio', audioBlob, 'voice.webm');
-  formData.append('nome', document.getElementById('nomeVoz').value || 'Minha Voz');
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 segundos
-
+async function carregarVozes() {
   try {
-    const resp = await fetch('/api/clone_voice', { method: 'POST', body: formData, signal: controller.signal });
-    clearTimeout(timeoutId);
+    const resp = await fetch('/api/vozes');
     const data = await resp.json();
+    const lista = document.getElementById('vozesLista');
 
-    document.getElementById('loadingClone').classList.remove('active');
-
-    if (data.success) {
-      voiceId = data.voice_id;
-      document.getElementById('cloneStatus').style.display = 'block';
-      document.getElementById('cloneStatus').textContent = '🧬 Voz clonada com sucesso! Avance para escolher o estilo.';
-      document.getElementById('cloneStatus').className = 'status-bar success';
-      document.getElementById('step1').classList.add('done');
-      localStorage.setItem('antidoto_voice_id', voiceId);
-      setTimeout(() => goToPanel(2), 1500);
-    } else {
-      document.getElementById('cloneStatus').style.display = 'block';
-      document.getElementById('cloneStatus').textContent = '❌ Erro: ' + data.error;
-      document.getElementById('cloneStatus').className = 'status-bar error';
+    if (!data.vozes || data.vozes.length === 0) {
+      lista.innerHTML = '<div class="empty">Nenhuma voz disponível. Verifique a chave API.</div>';
+      return;
     }
+
+    lista.innerHTML = data.vozes.map((v, i) => `
+      <div class="voz-card" id="voz_${v.voice_id}" onclick="selecionarVoz('${v.voice_id}', '${v.name.replace(/'/g,"\\'")}', this)">
+        <div class="avatar">${EMOJIS_VOZ[i % EMOJIS_VOZ.length]}</div>
+        <div class="info">
+          <h3>${v.name}</h3>
+          <span>${v.category === 'premade' ? '⭐ Voz pronta' : '🧬 Clonada'} ${v.labels && v.labels.accent ? '· ' + v.labels.accent : ''}</span>
+        </div>
+      </div>
+    `).join('');
+
+    document.getElementById('btnEscolherVoz').style.display = 'block';
   } catch(e) {
-    clearTimeout(timeoutId);
-    document.getElementById('loadingClone').classList.remove('active');
-    document.getElementById('cloneStatus').style.display = 'block';
-    const msg = e.name === 'AbortError' ? '⏱ Timeout! O servidor demorou demais. Tente um áudio mais curto (30s).' : '❌ Erro: ' + e.message;
-    document.getElementById('cloneStatus').textContent = msg;
-    document.getElementById('cloneStatus').className = 'status-bar error';
+    document.getElementById('vozesLista').innerHTML = '<div class="empty">Erro ao carregar vozes: ' + e.message + '</div>';
   }
-  document.getElementById('btnClonar').disabled = false;
 }
 
+function selecionarVoz(id, nome, el) {
+  document.querySelectorAll('.voz-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  voiceId = id;
+  voiceName = nome;
+
+  const status = document.getElementById('vozStatus');
+  status.style.display = 'block';
+  status.textContent = '✅ Voz selecionada: ' + nome;
+  status.className = 'status-bar success';
+}
+
+function confirmarVoz() {
+  if (!voiceId) { alert('Selecione uma voz primeiro!'); return; }
+  document.getElementById('step1').classList.add('done');
+  goToPanel(2);
+}
+
+// =====================
 // ESTILO
+// =====================
 function selecionarEstilo(estilo, el) {
   document.querySelectorAll('.estilo-btn').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
-  estiloSelecionado = estilo;
+  estiloAtual = estilo;
 }
 
 async function buscarLetras() {
+  if (!voiceId) { alert('Volte e escolha uma voz primeiro!'); return; }
+  document.getElementById('step2').classList.add('done');
+
   const resp = await fetch('/api/letras', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ estilo: estiloSelecionado })
+    body: JSON.stringify({estilo: estiloAtual})
   });
   const data = await resp.json();
+
   const lista = document.getElementById('letrasLista');
-  lista.innerHTML = '';
-  data.letras.forEach((l, i) => {
-    const div = document.createElement('div');
-    div.className = 'letra-card';
-    div.innerHTML = `<h3>🎵 ${l.titulo}</h3><p>${l.letra}</p>`;
-    div.onclick = () => {
-      document.querySelectorAll('.letra-card').forEach(c => c.classList.remove('selected'));
-      div.classList.add('selected');
-      letraSelecionada = l.letra;
-      tituloSelecionado = l.titulo;
-    };
-    lista.appendChild(div);
-  });
-  document.getElementById('step2').classList.add('done');
+  lista.innerHTML = data.letras.map((l, i) => `
+    <div class="letra-card" id="letra_${i}" onclick="selecionarLetra('${l.letra.replace(/\n/g,'\\n').replace(/'/g,"\\'")}', '${l.titulo.replace(/'/g,"\\'")}', this)">
+      <h3>🎵 ${l.titulo}</h3>
+      <p>${l.letra}</p>
+    </div>
+  `).join('');
+
   goToPanel(3);
 }
 
-function irParaGerar() {
+function selecionarLetra(letra, titulo, el) {
+  document.querySelectorAll('.letra-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  letraSelecionada = letra.replace(/\\n/g, '\n');
+  tituloSelecionado = titulo;
+  document.getElementById('letraCustom').value = '';
+  document.getElementById('tituloCustom').value = '';
+}
+
+// =====================
+// GERAR MÚSICA
+// =====================
+async function irParaGerar() {
   const letraCustom = document.getElementById('letraCustom').value.trim();
   const tituloCustom = document.getElementById('tituloCustom').value.trim();
 
-  if (letraCustom) {
-    letraSelecionada = letraCustom;
-    tituloSelecionado = tituloCustom || 'Minha Música';
-  }
+  const letra = letraCustom || letraSelecionada;
+  const titulo = tituloCustom || tituloSelecionado || 'Minha Música';
 
-  if (!letraSelecionada) { alert('Selecione ou escreva uma letra!'); return; }
-  if (!voiceId) {
-    voiceId = localStorage.getItem('antidoto_voice_id');
-    if (!voiceId) { alert('Você precisa clonar sua voz primeiro!'); goToPanel(1); return; }
-  }
+  if (!letra) { alert('Selecione ou escreva uma letra!'); return; }
+  if (!voiceId) { alert('Volte e escolha uma voz!'); return; }
 
   document.getElementById('step3').classList.add('done');
-  document.getElementById('nav4').style.display = 'block';
   goToPanel(4);
-  gerarMusica();
-}
 
-async function gerarMusica() {
   document.getElementById('loadingGerar').classList.add('active');
   document.getElementById('resultadoMusica').style.display = 'none';
   document.getElementById('erroGerar').style.display = 'none';
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 90000);
 
   try {
     const resp = await fetch('/api/gerar_musica', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ voice_id: voiceId, letra: letraSelecionada, titulo: tituloSelecionado })
+      body: JSON.stringify({ voice_id: voiceId, letra: letra, titulo: titulo }),
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
+
     const data = await resp.json();
     document.getElementById('loadingGerar').classList.remove('active');
 
     if (data.success) {
-      const audioSrc = 'data:audio/mpeg;base64,' + data.audio;
-      document.getElementById('audioMusica').src = audioSrc;
-      document.getElementById('tituloMusica').textContent = '🎵 ' + data.titulo;
+      ultimoAudioB64 = data.audio;
+      ultimoTitulo = titulo;
+
+      const audioBlob = b64ToBlob(data.audio, 'audio/mpeg');
+      const audioUrl = URL.createObjectURL(audioBlob);
+      document.getElementById('audioPlayer').src = audioUrl;
+      document.getElementById('tituloMusica').textContent = '🎵 ' + titulo;
       document.getElementById('resultadoMusica').style.display = 'block';
-      ultimaMusica = { titulo: data.titulo, audio: data.audio, estilo: estiloSelecionado };
+      document.getElementById('step4').classList.add('done');
     } else {
       document.getElementById('erroGerar').style.display = 'block';
       document.getElementById('erroGerar').textContent = '❌ ' + data.error;
     }
   } catch(e) {
+    clearTimeout(timeoutId);
     document.getElementById('loadingGerar').classList.remove('active');
     document.getElementById('erroGerar').style.display = 'block';
-    document.getElementById('erroGerar').textContent = '❌ Erro: ' + e.message;
+    const msg = e.name === 'AbortError' ? '⏱ Timeout! O servidor demorou demais. Tente novamente.' : '❌ Erro: ' + e.message;
+    document.getElementById('erroGerar').textContent = msg;
   }
 }
 
+function b64ToBlob(b64, mime) {
+  const bytes = atob(b64);
+  const ab = new ArrayBuffer(bytes.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < bytes.length; i++) ia[i] = bytes.charCodeAt(i);
+  return new Blob([ab], {type: mime});
+}
+
+// =====================
 // BIBLIOTECA
+// =====================
 function salvarMusica() {
-  if (!ultimaMusica) return;
-  const lib = JSON.parse(localStorage.getItem('antidoto_lib') || '[]');
-  lib.unshift({ ...ultimaMusica, data: new Date().toLocaleDateString('pt-BR') });
-  localStorage.setItem('antidoto_lib', JSON.stringify(lib));
-  alert('✅ Música salva na biblioteca!');
+  if (!ultimoAudioB64) return;
+  const biblioteca = JSON.parse(localStorage.getItem('antidoto_biblioteca') || '[]');
+  biblioteca.push({
+    titulo: ultimoTitulo,
+    audio: ultimoAudioB64,
+    voz: voiceName,
+    estilo: estiloAtual,
+    data: new Date().toLocaleDateString('pt-BR')
+  });
+  localStorage.setItem('antidoto_biblioteca', JSON.stringify(biblioteca));
+  alert('💾 Salvo na biblioteca!');
 }
 
 function carregarBiblioteca() {
-  const lib = JSON.parse(localStorage.getItem('antidoto_lib') || '[]');
+  const biblioteca = JSON.parse(localStorage.getItem('antidoto_biblioteca') || '[]');
   const lista = document.getElementById('bibliotecaLista');
-  if (lib.length === 0) {
-    lista.innerHTML = '<p style="color:#6b7280">Nenhuma música salva ainda.</p>';
+
+  if (biblioteca.length === 0) {
+    lista.innerHTML = '<div class="empty">Nenhuma música salva ainda.<br>Gere uma música e clique em "Salvar"!</div>';
     return;
   }
-  lista.innerHTML = lib.map((m, i) => `
+
+  lista.innerHTML = biblioteca.map((m, i) => `
     <div class="musica-item">
-      <h3>🎵 ${m.titulo} <small style="color:#6b7280">${m.data}</small></h3>
-      <audio controls src="data:audio/mpeg;base64,${m.audio}"></audio>
-      <button class="btn btn-danger" onclick="deletarMusica(${i})" style="margin-top:8px;padding:8px">🗑 Deletar</button>
+      <h3>🎵 ${m.titulo}</h3>
+      <small style="color:#6b7280">🎤 ${m.voz || '?'} · 🎸 ${m.estilo || '?'} · 📅 ${m.data || ''}</small>
+      <audio controls src="${'data:audio/mpeg;base64,' + m.audio}" style="margin-top:8px"></audio>
+      <button class="del-btn" onclick="deletarMusica(${i})">🗑 Apagar</button>
     </div>
   `).join('');
 }
 
 function deletarMusica(i) {
-  const lib = JSON.parse(localStorage.getItem('antidoto_lib') || '[]');
-  lib.splice(i, 1);
-  localStorage.setItem('antidoto_lib', JSON.stringify(lib));
+  const biblioteca = JSON.parse(localStorage.getItem('antidoto_biblioteca') || '[]');
+  biblioteca.splice(i, 1);
+  localStorage.setItem('antidoto_biblioteca', JSON.stringify(biblioteca));
   carregarBiblioteca();
 }
 
-// Recuperar voice_id salvo
-window.onload = () => {
-  const saved = localStorage.getItem('antidoto_voice_id');
-  if (saved) {
-    voiceId = saved;
-    document.getElementById('cloneStatus').style.display = 'block';
-    document.getElementById('cloneStatus').textContent = '✅ Voz clonada anteriormente detectada! Pode avançar.';
-    document.getElementById('cloneStatus').className = 'status-bar success';
-    document.getElementById('step1').classList.add('done');
-  }
-};
+// Init
+carregarVozes();
 </script>
 </body>
 </html>
