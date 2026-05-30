@@ -1,14 +1,12 @@
 import os, uuid, base64, requests, traceback, json, random
 from flask import Flask, request, jsonify, render_template
-from pydub import AudioSegment
-import io
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 
 ELEVENLABS_API_KEY = os.environ.get('ELEVENLABS_API_KEY', '')
 
-# Letras pré-geradas por estilo (fallback sem OpenAI)
+# Letras pré-geradas por estilo
 LETRAS = {
     'funk': [
         ("Minha Voz", "Eu chego chegando, todo mundo me olha\nMinha voz é fogo, ninguém me segura\nNo baile da vida eu sei dançar\nCom minha música vou te conquistar"),
@@ -48,58 +46,42 @@ def index():
 
 @app.route('/api/letras', methods=['POST'])
 def get_letras():
-    """Retorna letras disponíveis para o estilo escolhido"""
     data = request.get_json()
     estilo = data.get('estilo', 'pop').lower()
     letras = LETRAS.get(estilo, LETRAS['pop'])
     resultado = [{'titulo': t, 'letra': l} for t, l in letras]
     return jsonify({'letras': resultado})
 
-@app.route('/api/clone_voice', methods=['POST'])
-def clone_voice():
-    """Clona a voz usando ElevenLabs"""
+@app.route('/api/vozes', methods=['GET'])
+def listar_vozes():
+    """Lista as vozes disponíveis do ElevenLabs (prontas para usar)"""
     try:
-        if 'audio' not in request.files:
-            return jsonify({'error': 'Nenhum arquivo de áudio enviado'}), 400
-
-        audio_file = request.files['audio']
-        nome = request.form.get('nome', 'Minha Voz')
-
-        # Salva o arquivo temporariamente
-        tmp_path = f'/tmp/voice_{uuid.uuid4().hex}.webm'
-        audio_file.save(tmp_path)
-
-        # Converte para MP3
-        mp3_path = tmp_path + '.mp3'
-        os.system(f'ffmpeg -y -i {tmp_path} -ar 44100 -ac 1 {mp3_path} 2>/dev/null')
-
-        # Envia para ElevenLabs para clonar a voz
-        with open(mp3_path, 'rb') as f:
-            resp = requests.post(
-                'https://api.elevenlabs.io/v1/voices/add',
-                headers={'xi-api-key': ELEVENLABS_API_KEY},
-                data={'name': nome, 'description': 'Voz clonada pelo Antídoto'},
-                files={'files': (f'{nome}.mp3', f, 'audio/mpeg')},
-                timeout=60
-            )
-
-        os.remove(tmp_path)
-        os.remove(mp3_path)
-
+        resp = requests.get(
+            'https://api.elevenlabs.io/v1/voices',
+            headers={'xi-api-key': ELEVENLABS_API_KEY},
+            timeout=30
+        )
         if resp.status_code == 200:
-            voice_data = resp.json()
-            voice_id = voice_data.get('voice_id')
-            return jsonify({'success': True, 'voice_id': voice_id, 'nome': nome})
+            voices = resp.json().get('voices', [])
+            # Retorna nome, id e categoria de cada voz
+            resultado = [
+                {
+                    'voice_id': v['voice_id'],
+                    'name': v['name'],
+                    'category': v.get('category', 'premade'),
+                    'labels': v.get('labels', {})
+                }
+                for v in voices
+            ]
+            return jsonify({'vozes': resultado})
         else:
-            return jsonify({'error': f'Erro ElevenLabs: {resp.text}'}), 400
-
+            return jsonify({'vozes': [], 'error': resp.text}), 400
     except Exception as e:
-        traceback.print_exc()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'vozes': [], 'error': str(e)}), 500
 
 @app.route('/api/gerar_musica', methods=['POST'])
 def gerar_musica():
-    """Gera a música com a voz clonada cantando a letra"""
+    """Gera áudio com uma voz pronta do ElevenLabs"""
     try:
         data = request.get_json()
         voice_id = data.get('voice_id')
@@ -109,7 +91,6 @@ def gerar_musica():
         if not voice_id or not letra:
             return jsonify({'error': 'voice_id e letra são obrigatórios'}), 400
 
-        # Usa ElevenLabs Text-to-Speech com a voz clonada
         resp = requests.post(
             f'https://api.elevenlabs.io/v1/text-to-speech/{voice_id}',
             headers={
@@ -120,9 +101,9 @@ def gerar_musica():
                 'text': letra,
                 'model_id': 'eleven_multilingual_v2',
                 'voice_settings': {
-                    'stability': 0.5,
+                    'stability': 0.4,
                     'similarity_boost': 0.8,
-                    'style': 0.3,
+                    'style': 0.5,
                     'use_speaker_boost': True
                 }
             },
@@ -142,40 +123,6 @@ def gerar_musica():
 
     except Exception as e:
         traceback.print_exc()
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/listar_vozes', methods=['GET'])
-def listar_vozes():
-    """Lista as vozes clonadas do usuário"""
-    try:
-        resp = requests.get(
-            'https://api.elevenlabs.io/v1/voices',
-            headers={'xi-api-key': ELEVENLABS_API_KEY},
-            timeout=30
-        )
-        if resp.status_code == 200:
-            voices = resp.json().get('voices', [])
-            # Filtra apenas vozes clonadas (não as padrão)
-            cloned = [v for v in voices if v.get('category') == 'cloned']
-            return jsonify({'vozes': cloned})
-        else:
-            return jsonify({'vozes': []})
-    except Exception as e:
-        return jsonify({'vozes': [], 'error': str(e)})
-
-@app.route('/api/deletar_voz', methods=['POST'])
-def deletar_voz():
-    """Deleta uma voz clonada"""
-    try:
-        data = request.get_json()
-        voice_id = data.get('voice_id')
-        resp = requests.delete(
-            f'https://api.elevenlabs.io/v1/voices/{voice_id}',
-            headers={'xi-api-key': ELEVENLABS_API_KEY},
-            timeout=30
-        )
-        return jsonify({'success': resp.status_code == 200})
-    except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
