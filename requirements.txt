@@ -1,7 +1,4 @@
 flask
 requests
-numpy
-scipy
-soundfile
 pydub
 gunicorn
